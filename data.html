@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Enter Data - CSPC CEA LEED Assessment Portal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Data Entry</h1>
+    <div class="header-buttons">
+      <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Building Measurements</h2>
+      <form id="dataForm">
+        <label>Energy Consumption (kWh/month):</label><br>
+        <input type="number" id="energy" placeholder="e.g., 720"><br><br>
+
+        <label>Water Usage (L/day):</label><br>
+        <input type="number" id="water" placeholder="e.g., 1800"><br><br>
+
+        <label>Indoor Air Quality (CO2 ppm):</label><br>
+        <input type="number" id="air" placeholder="e.g., 450"><br><br>
+
+        <button type="button" onclick="saveData()">Save Data</button>
+      </form>
+      <p id="savedMsg"></p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

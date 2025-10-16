@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Dashboard - CSPC CEA LEED Assessment Portal</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>CSPC CEA LEED Assessment Portal</h1>
+    <div class="header-buttons">
+      <button onclick="logout()">Logout</button>
+      <button onclick="window.location.href='data.html'">Enter Data</button>
+      <button onclick="window.location.href='report.html'">Generate Report</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>LEED Category Points</h2>
+      <canvas id="leedChart" width="600" height="300"></canvas>
+    </section>
+
+    <section class="card">
+      <h2>Current Certification Level</h2>
+      <p id="certLevel">—</p>
+      <button onclick="calculateAndShow()">Recalculate</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    // sample chart draw using Chart.js and values from localStorage (or defaults)
+    function drawChart() {
+      const energy = Number(localStorage.getItem('energy') || 10);
+      const water = Number(localStorage.getItem('water') || 8);
+      const air = Number(localStorage.getItem('air') || 9);
+      const ctx = document.getElementById('leedChart').getContext('2d');
+      if(window.leedChartInstance) { window.leedChartInstance.destroy(); }
+      window.leedChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Energy', 'Water', 'Indoor Air Quality'],
+          datasets: [{
+            label: 'LEED Points',
+            data: [energy, water, air],
+            borderWidth: 1
+          }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    function calculateAndShow() {
+      // use same logic as report page
+      const energy = Number(localStorage.getItem('energy') || 0);
+      const water = Number(localStorage.getItem('water') || 0);
+      const air = Number(localStorage.getItem('air') || 0);
+      let score = 0;
+      if (energy > 0) {
+        if (energy < 500) score += 10;
+        else if (energy < 800) score += 6;
+      }
+      if (water > 0) {
+        if (water < 2000) score += 8;
+        else if (water < 4000) score += 4;
+      }
+      if (air > 0) {
+        if (air < 50) score += 9;
+        else if (air < 100) score += 4;
+      }
+      let level = "Not enough data";
+      if (score >= 45) level = "Platinum";
+      else if (score >= 35) level = "Gold";
+      else if (score >= 25) level = "Silver";
+      else if (score > 0) level = "Certified";
+      document.getElementById('certLevel').innerText = level + " (Score: " + score + ")";
+      drawChart();
+    }
+
+    // initialize
+    drawChart();
+    calculateAndShow();
+  </script>
+</body>
+</html>

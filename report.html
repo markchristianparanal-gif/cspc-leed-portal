@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>Report - CSPC CEA LEED Assessment Portal</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- jsPDF CDN for client-side PDF generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>LEED Compliance Report</h1>
+    <div class="header-buttons">
+      <button onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Summary</h2>
+      <p id="summaryText">—</p>
+      <canvas id="reportChart" width="600" height="300"></canvas>
+      <br>
+      <button onclick="generatePDF()">Download PDF Report</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    function populateReport() {
+      const energy = Number(localStorage.getItem('energy') || 0);
+      const water = Number(localStorage.getItem('water') || 0);
+      const air = Number(localStorage.getItem('air') || 0);
+      let score = 0;
+      if (energy > 0) {
+        if (energy < 500) score += 10;
+        else if (energy < 800) score += 6;
+      }
+      if (water > 0) {
+        if (water < 2000) score += 8;
+        else if (water < 4000) score += 4;
+      }
+      if (air > 0) {
+        if (air < 50) score += 9;
+        else if (air < 100) score += 4;
+      }
+      let level = "Not enough data";
+      if (score >= 45) level = "Platinum";
+      else if (score >= 35) level = "Gold";
+      else if (score >= 25) level = "Silver";
+      else if (score > 0) level = "Certified";
+
+      const summary = `Energy: ${energy} kWh/month\nWater: ${water} L/day\nIndoor Air (CO2 ppm): ${air}\n\nCalculated LEED Score: ${score}\nCertification Level: ${level}`;
+      document.getElementById('summaryText').innerText = summary;
+
+      // draw chart
+      const ctx = document.getElementById('reportChart').getContext('2d');
+      if(window.reportChartInstance) window.reportChartInstance.destroy();
+      window.reportChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Energy Points', 'Water Points', 'Air Quality Points'],
+          datasets: [{
+            label: 'Points',
+            data: [
+              (energy>0? (energy<500?10:(energy<800?6:2)) : 0),
+              (water>0? (water<2000?8:(water<4000?4:1)) : 0),
+              (air>0? (air<50?9:(air<100?4:1)) : 0)
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: { scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    async function generatePDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      const summaryText = document.getElementById('summaryText').innerText;
+      doc.setFontSize(14);
+      doc.text('CSPC CEA LEED Compliance Report', 14, 20);
+      doc.setFontSize(10);
+      const lines = doc.splitTextToSize(summaryText, 180);
+      doc.text(lines, 14, 36);
+
+      doc.save('CSPC_CEA_LEED_Report.pdf');
+    }
+
+    populateReport();
+  </script>
+</body>
+</html>
